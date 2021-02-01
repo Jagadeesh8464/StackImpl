@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+   name: stackimpl-deployment
+   labels:
+     app: stackimpl
+   annotations:
+        # Enable custom metrics scraping (optional)
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8080'
+        prometheus.io/path: '/actuator/prometheus'
+spec:
+   replicas: 1
+   selector:
+     matchLabels:
+       app: stackimpl
+   template:
+     metadata:
+       labels:
+         app: stackimpl
+     spec:
+       containers:
+       - name: stackimpl
+         image: localhost:5000/StackImpl:latest
+         ports:
+         - containerPort: 2020
+         volumeMounts:
+         - name: stackimpl-volume
+           mountPath: "/config"
+       volumes:                        
+        - name: stackimpl-volume
+          configMap: 
+            name: stackimpl-configmap
+            items: 
+            - key: application.properties
+              path: application.properties
